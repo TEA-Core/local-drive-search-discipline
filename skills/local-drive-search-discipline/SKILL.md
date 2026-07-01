@@ -34,6 +34,30 @@ an empty path searched from `/`, blocked ~70 min on Chrome cache files under
 - These help but DO NOT replace rule 3 — exclusions alone did NOT stop the real
   hang, because `/mnt/c` itself is the slow tree, not node_modules.
 
+## Known paths — go directly, don't hunt
+
+The #1 cause of a goose-chase is landing in one repo and searching for a file
+that lives in another. Your `$PAPERCLIP_WORKSPACE_CWD` is only ONE project — do
+NOT assume everything is under it. If a task names an absolute path, **run/read
+that exact path directly** — do not `rg`/`find`/`ls` around to "locate" it first.
+
+Canonical host locations (WSL2, user `kronik`):
+
+| What | Path |
+|---|---|
+| Main project repos (TSP, Modular-Alpha/Mooncatcher, etc.) | `/home/kronik/scratch/<repo>` |
+| Trading-Signal-Platform runtime repo | `/home/kronik/scratch/Trading-Signal-Platform` |
+| Paperclip agent Python tools (fire scripts, self-improve, audit CLI) | `/home/kronik/scratch/paperclip-agent-tools` |
+| — its self-improve + audit code | `/home/kronik/scratch/paperclip-agent-tools/python/agent-workflow-audit` |
+| An agent's own instructions / AGENTS.md | `~/.paperclip/instances/default/companies/<companyId>/agents/<agentId>/instructions/` |
+| Second-Brain Obsidian vaults (TSP, Mooncatcher planning) | `/mnt/c/Users/david/Documents/projects/<project>/` (alias: `/mnt/c/Users/david/My Documents/projects/`) |
+| shared-brain vault (credentials, connections, runbooks) | `/mnt/c/Users/david/Documents/shared-brain/` |
+
+Rules for using this map:
+- If you were handed an **absolute path** (e.g. `bash /home/kronik/scratch/paperclip-agent-tools/.../run_self_improve.sh`), **run it as given.** It is correct even if your `cwd` is a different repo. Do NOT search for it.
+- A tool in `paperclip-agent-tools` is NOT under a project's runtime repo — the routine may spawn you in a project workspace (e.g. `/home/kronik/scratch/Trading-Signal-Platform`) while the tool lives in `paperclip-agent-tools`. That is expected; use the absolute path, don't hunt.
+- Vault paths under `/mnt/c/...` are for reading **one explicit file** (the allowed escape hatch, rule 3) — never `rg`/`find` across `/mnt/c` (slow 9p, hangs the run).
+
 ## Quick reference
 
 ```bash
